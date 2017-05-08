@@ -1,180 +1,100 @@
 //Colin Aslett, Red Black Tree Insertion, C++ Period 07
 #include <iostream>
+#include "title.h"
+#include <fstream>
 
 using namespace std;
-
-struct Node{
-  Node* lchild;
-  Node* rchild;
-  int data;
-  Node* parent;
-  bool color;//black is true, red is false
-  Node(int datax,bool colorx = false) : lchild(0), rchild(0), parent(0){
-    data = datax;
-    color = colorx;
-  }
-  Node() : lchild(0), rchild(0), parent(0){
-    data = 0;
-    color = true;
-  }
-  //retrieving the node's uncle
-  Node* Uncle(){
-    Node* gp = Grandparent();
-    if(gp == 0){
-      return 0;
-    }
-    if(gp->lchild == parent){
-      gp->rchild;
-    }
-    return gp->lchild;
-  }
-  //retrieving the node's GP
-  Node* Grandparent(){
-    if(parent == 0){
-      return 0;
-    }
-    return parent->parent;
-  }
-  //setting the left node
-  void Left(Node* node){
-    lchild = node;
-    if(node != 0){
-      node->parent = this;
-    }
-  }
-  //setting the right node
-  void Right(Node* node){
-    rchild = node;
-    if(node != 0){
-      node->parent = this;
-    }
-  }
-  //setting a node's color
-  void Color(char x){
-    if(x == 'r'){
-      color = false;
-    }
-    else{
-      color = true;
-    }
-  }
-  //retrieves the direction of a node's child
-  bool child(char dir){
-    if(dir = '1'){
-      return parent->lchild == this;
-    }
-    else{
-      return parent->rchild == this;
-    }
-  }
-};
-Node* root;
-void add();//adding numbers manually
-bool fileadd();//adding numbers via a file
-void print();//printing out the tree
-void insert(int num);//inserting node into tree
-void preserve(Node* xx);//preserving the red black tree state
-void first(Node* node,int numb);//initial insertion is BST
+void add(RBT &rbt);//getting numbers to the tree manually
+void file(RBT &rbt);//getting numbers to the tree via file
+void insert(RBT &rbt,char* list);//adding the list of numbers to the RBT
 int main(){
   cout << "HELLO! You have entered the Red Black Tree Insertion" << endl;
   bool kg = true;
   while(kg == true){
+    RBT tree;//RBT called tree
+    cout << "You have 3 options, 1 = add numbers, 2 = add numbers via file, 3 = quit program :(" << endl;
     char input;
-    cout << "you have two options, 1 = insert numbers manually, 2 = file name, 3 = quit" << endl;
     cin >> input;
-    //adding manually
     if(input == '1'){
-      add();
+      add(tree);
     }
-    //adding via file
     else if(input == '2'){
-      if(!fileadd()){
-	continue;
+      file(tree);
+    }
+    else if(input == '3'){
+      break;
+    }
+    else{
+      cout << "???" << endl;
+      continue;
+    }
+    while(true){
+      cout << "You have 4 options, 1 = add numbers, 2 = add numbers via file, 3 = print, 4 = quit" << endl;
+      char dput;
+      cin >> dput;
+      if(dput == '3'){
+	cout << "RBT: " << endl;
+	tree.print();
+      }
+      else if(dput == '2'){
+	file(tree);
+      }
+      else if(dput == '1'){
+	add(tree);
+      }
+      else if(dput == '4'){
+	break;
+      }
+      else{
+	cout << "???" << endl;
       }
     }
-    //quitting program
-    else if(input == '3'){
+    /*
+    if(dput == '4' || input == '3'){
       kg = false;
       break;
     }
-    //something that is not one of the three
-    else{
-      cout << "not one of the three inputs" << endl;
-      continue;
-    }
-    //next step
-    while(true){
-      cout << "Three options: 1 = print, 2 = add numbers manually, 3 = add numbers via file, 4 = quit" << endl;
-      cin >> input;
-      if(input == '1'){
-        cout << "RBT:" << endl;
-        print();
-      }
-      else if(input == '2'){
-        add();
-      }
-      else if(input == '3'){
-        fileadd();
-      }
-      else if(input == '4'){
-        break;
-      }
-      else{
-        cout << "Command not recognized" << endl;
-      }
-    }
+    */
   }
+  return 0;
 }
 //adding numbers manually
-void add(){
+void add(RBT &rbt){
   char list[200];
-  cout << "Enter numbers seperated by spaces" << endl;
+  cout << "Enter numbers seperated by spaces: " << endl;
   cin.ignore();
   cin.getline(list,200);
-  //next part
-  int index = 0;
-  while(list[index]){
-    if(isdigit(list[index])){
-      int num = list[index] - '0';
-      while(isdigit(list[++index])){
-	num = 10*num + (list[index] - '0');
-      }
-      insert(num);
-    }
-    else{
-      index++;
-    }
-  }
+  insert(rbt,list);
 }
 //adding numbers via file
-bool fileadd(){
-  
-}
-//printint out the tree
-void print(){
-  
-}
-//inserting number to node
-void insert(int num){
-  preserve(first(root,num));
-}
-//preserving the RBT properties
-void preserve(Node* xx){
-  if(xx->parent == 0){//node is head
-    xx->Color('b');
-    return;
+void file(RBT &rbt){
+  char filex[64];
+  cout << "File Name: " << endl;
+  cin >> filex;
+  ifstream stream(filex);
+  if(stream.is_open()){
+    char list[10000];
+    stream.getline(list,10000,0);
+    stream.close();
+    insert(rbt,list);
   }
-  else if(xx->parent->color){//parent is black
-    return;
-  }
-  else if(xx->Uncle()->color == false){//parent is red, and uncle
-    xx->parent->Color('b');
-    xx->Uncle()->Color('b');
-    xx->Grandparent()->Color('r');
-    preserve(xx->Grandparent());
-    return;
+  else{
+    cout << "No file exists with that name" << endl;
   }
 }
-void first(Node* node,int numb){
-  
+//inserting numbers into the RBT, individually, first seperating them
+void insert(RBT &rbt,char* list){
+  int num = 0;
+  while(list[num]){
+    if(isdigit(list[num])){
+      int numb = list[num] - '0';
+      while(isdigit(list[++num])){
+	numb = 10*num + (list[num] - '0');
+      }
+      rbt.add(numb);
+    }
+    else{
+      num++;
+    }
+  }
 }
